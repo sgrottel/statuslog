@@ -23,9 +23,9 @@ This service is not meant to update with second or microsecond speed.
 
 ### Scope
 This project contains:
-* API definition -- TODO
+* [API definition](./doc/api.md)
 * Documentation on
-	* Getting Started -- TODO
+	* [Getting Started](./doc/getting-started.md)
 	* Usage Examples -- TODO
 * A test framework to test implementations of this API -- TODO
 * A mock implementation of this API to easily tests clients -- TODO

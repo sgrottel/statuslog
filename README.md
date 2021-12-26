@@ -27,8 +27,8 @@ This project contains:
 * Documentation on
 	* [Getting Started](./doc/getting-started.md)
 	* Usage Examples -- TODO
+* A [mock server](./server/README.md) implementation of this API to easily tests clients
 * A test framework to test implementations of this API -- TODO
-* A mock implementation of this API to easily tests clients -- TODO
 
 This project does **not** contain:
 * A production ready implementation of this API

@@ -41,7 +41,9 @@ A value of `null` has the same meaning as if the field is missing.
 
 Return values:
 * `200` in case of successfully posting the event.
-The return message body is a JSON object providing a numeric id of the newly posted event: `{ "id": number }`.
+The return message body is a JSON object providing a sortable id of the newly posted event: `{ "id": number | string }`.
+An implementation should either use numeric values or unique, sortable string values.
+Never mix both.
 * `400` is case of a malformed message body, e.g. invalid values, wrong value types, or missing required fields.
 
 

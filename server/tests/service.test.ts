@@ -22,4 +22,15 @@ describe('APP should say "Hello World!"', () => {
         done()
       })
   });
+
+  it('should return 500', (done) => {
+    request(app)
+      .get('/status/entity/?limit=4&start=4')
+      .expect(500)
+      .end((err, res) => {
+        if (err) return done(err)
+        expect(res.body).toMatchObject({})
+        done()
+      })
+  });
 });

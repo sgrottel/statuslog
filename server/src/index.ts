@@ -4,7 +4,7 @@
 // Available under MIT LICENSE
 //
 import express, { Request, Response, Application } from 'express';
-import { StatusLog } from "./service"
+import { StatusLogService } from "./service"
 
 // express application
 const app: Application = express();
@@ -23,7 +23,7 @@ const API_ROOT = ensureApiRoot(process.env.API_ROOT || '/status/');
 
 app.use(express.json());
 
-const service: StatusLog = new StatusLog(API_ROOT);
+const service: StatusLogService = new StatusLogService(API_ROOT);
 service.registerRoutes(app);
 
 if (API_ROOT !== '/') {

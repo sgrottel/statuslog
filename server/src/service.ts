@@ -4,7 +4,11 @@
 // Available under MIT LICENSE
 //
 import { Application, Request, Response } from 'express';
-import { StatusLog, EntityType, Entity, Event, FutureValue } from './status-log';
+import { StatusLog, EntityType, Entity, Event, FutureValue, EntityTypeId } from './status-log';
+
+interface EntityTypeWithId extends EntityType {
+	id: EntityTypeId
+}
 
 export class StatusLogService extends StatusLog {
 	private apiRoot: string;
@@ -15,14 +19,14 @@ export class StatusLogService extends StatusLog {
 	}
 
 	public registerRoutes(app: Application) {
-		app.post(`${this.apiRoot}event/`, this.postEventHandler.bind(this) );
+		app.post(`${this.apiRoot}event/`, this.postEventHandler.bind(this));
 		app.get(`${this.apiRoot}event/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}event/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.post(`${this.apiRoot}entity/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.get(`${this.apiRoot}entity/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.patch(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
-		app.post(`${this.apiRoot}type/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.post(`${this.apiRoot}type/`, this.postTypeHandler.bind(this));
 		app.get(`${this.apiRoot}type/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.patch(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
@@ -52,6 +56,7 @@ export class StatusLogService extends StatusLog {
 
 		if (!ev.validFor) return res.status(400).send('Missing validFor');
 		if (typeof (ev.validFor) !== 'number') return res.status(400).send('Malformed validFor');
+		if (ev.validFor <= 0) return res.status(400).send('Non-positive validFor');
 
 		if (ev.text && typeof (ev.text) !== 'string') return res.status(400).send('Malformed text');
 		if (ev.link && typeof (ev.link) !== 'string') return res.status(400).send('Malformed link');
@@ -59,4 +64,22 @@ export class StatusLogService extends StatusLog {
 		const id = this.postEvent(ev);
 		return res.status(200).send({ "id": id });
 	}
+
+	private postTypeHandler(req: Request, res: Response): Response {
+		let ty = req.body as EntityTypeWithId;
+		if (!ty) return res.status(400).send('Malformed request');
+
+		if (!ty.id) return res.status(400).send('Missing id');
+
+		if (!ty.maxAge
+			&& !ty.maxCount
+			&& !ty.text
+			&& !ty.link) return res.status(400).send('Empty type');
+
+		if (this.hasEntityType(ty.id)) return res.status(409).send('Type known');
+
+		const id = this.postEntityType(ty.id, ty);
+		return res.status(200).send({ "id": id });
+	}
+
 }

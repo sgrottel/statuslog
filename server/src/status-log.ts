@@ -107,6 +107,16 @@ export class StatusLog {
 	private futureValues: Map<FutureValueId, FutureValue> = new Map<FutureValueId, FutureValue>();
 	private nextFutureValueId: FutureValueId = 1;
 
+	protected hasEntityType(id: EntityTypeId) : boolean {
+		return this.entityTypes.has(id);
+	}
+
+	protected postEntityType(id: EntityTypeId, ty: EntityType): EntityTypeId {
+		if (this.entityTypes.has(id)) throw new RangeError("id conflict");
+		this.entityTypes.set(id, cleanEntityType(ty));
+		return id;
+	}
+
 	protected postEvent(ev: Event): EventId {
 		// ensure entity exists
 		if (!this.entities.has(ev.entity)) {

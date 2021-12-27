@@ -28,6 +28,4 @@ Using Jest:
 ```
 npm run test
 ```
-
-Inspect:
-[./coverage/lcov-report/index.html](./coverage/lcov-report/index.html)
+Then inspect: ./coverage/lcov-report/index.html

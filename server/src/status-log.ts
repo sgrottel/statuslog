@@ -4,8 +4,6 @@
 // Available under MIT LICENSE
 //
 
-import { toUSVString } from "util";
-
 function cleanObject(i: any): any {
 	// remove undefined properties from object
 	Object.keys(i).forEach(key => {

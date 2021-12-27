@@ -1,3 +1,8 @@
+//
+// Simple implementation of sg.statuslog
+// Testing POST routes independently
+// Available under MIT LICENSE
+//
 import request from "supertest";
 import express, { Application } from 'express';
 import { StatusLogService } from "../src/service"

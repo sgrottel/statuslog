@@ -14,25 +14,49 @@ function cleanObject(i: any): any {
 	return i;
 }
 
+export type EntityTypeId = string;
 export interface EntityType {
-	// name/id is map key
+	// id is map key
 	maxAge: number | null,
 	maxCount: number | null,
 	text: string | null,
 	link: string | null
 }
 
+function cleanEntityType(i: EntityType): EntityType {
+	// explicitly copy only known values
+	return cleanObject({
+		maxAge: i.maxAge,
+		maxCount: i.maxCount,
+		text: i.text,
+		link: i.link
+	})
+}
+
+export type EntityId = string;
 export interface Entity {
-	// name/id is map key
-	type: string | null,
+	// id is map key
+	type: EntityTypeId | null,
 	maxAge: number | null,
 	maxCount: number | null,
 	text: string | null,
 	link: string | null
 }
 
+function cleanEntity(i: Entity): Entity {
+	// explicitly copy only known values
+	return cleanObject({
+		type: i.type,
+		maxAge: i.maxAge,
+		maxCount: i.maxCount,
+		text: i.text,
+		link: i.link
+	})
+}
+
+export type EventId = number;
 export interface Event {
-	entity: string,
+	entity: EntityId,
 	value: string,
 	timestamp: Date | null,
 	validFor: number,
@@ -52,25 +76,38 @@ function cleanEvent(i: Event): Event {
 	})
 }
 
+export type FutureValueId = number;
 export interface FutureValue {
-	entity: string | null,
-	type: string | null,
+	entity: EntityId | null,
+	type: EntityTypeId | null,
 	value: string,
 	validFor: number,
 	text: string | null,
 	link: string | null
 }
 
+function cleanFutureValue(i: FutureValue): FutureValue {
+	// explicitly copy only known values
+	return cleanObject({
+		entity: i.entity,
+		type: i.type,
+		value: i.value,
+		validFor: i.validFor,
+		text: i.text,
+		link: i.link
+	})
+}
+
 export class StatusLog {
 
-	private entities: Map<string, Entity> = new Map<string, Entity>();
-	private entityTypes: Map<string, EntityType> = new Map<string, EntityType>();
-	private events: Map<number, Event> = new Map<number, Event>();
-	private nextEventId: number = 1;
-	private futureValues: Map<number, FutureValue> = new Map<number, FutureValue>();
-	private nextFutureValueId: number = 1;
+	private entities: Map<EntityId, Entity> = new Map<EntityId, Entity>();
+	private entityTypes: Map<EntityTypeId, EntityType> = new Map<EntityTypeId, EntityType>();
+	private events: Map<EventId, Event> = new Map<EventId, Event>();
+	private nextEventId: EventId = 1;
+	private futureValues: Map<FutureValueId, FutureValue> = new Map<FutureValueId, FutureValue>();
+	private nextFutureValueId: FutureValueId = 1;
 
-	protected postEvent(ev: Event): number {
+	protected postEvent(ev: Event): EventId {
 		// ensure entity exists
 		if (!this.entities.has(ev.entity)) {
 			this.entities.set(ev.entity, {} as Entity)

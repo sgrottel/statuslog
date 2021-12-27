@@ -4,10 +4,14 @@
 // Available under MIT LICENSE
 //
 import { Application, Request, Response } from 'express';
-import { StatusLog, EntityType, Entity, Event, FutureValue, EntityTypeId } from './status-log';
+import { StatusLog, EntityType, Entity, Event, FutureValue, EntityTypeId, EntityId } from './status-log';
 
 interface EntityTypeWithId extends EntityType {
 	id: EntityTypeId
+}
+
+interface EntityWithId extends Entity {
+	id: EntityId
 }
 
 export class StatusLogService extends StatusLog {
@@ -22,7 +26,7 @@ export class StatusLogService extends StatusLog {
 		app.post(`${this.apiRoot}event/`, this.postEventHandler.bind(this));
 		app.get(`${this.apiRoot}event/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}event/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
-		app.post(`${this.apiRoot}entity/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.post(`${this.apiRoot}entity/`, this.postEntityHandler.bind(this));
 		app.get(`${this.apiRoot}entity/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.patch(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
@@ -65,10 +69,20 @@ export class StatusLogService extends StatusLog {
 		return res.status(200).send({ "id": id });
 	}
 
+	private postEntityHandler(req: Request, res: Response): Response {
+		let en = req.body as EntityWithId;
+		if (!en) return res.status(400).send('Malformed request');
+		if (!en.id) return res.status(400).send('Missing id');
+
+		if (this.hasEntity(en.id)) return res.status(409).send('Entity known');
+
+		const id = this.postEntity(en.id, en);
+		return res.status(200).send({ "id": id });
+	}
+
 	private postTypeHandler(req: Request, res: Response): Response {
 		let ty = req.body as EntityTypeWithId;
 		if (!ty) return res.status(400).send('Malformed request');
-
 		if (!ty.id) return res.status(400).send('Missing id');
 
 		if (!ty.maxAge

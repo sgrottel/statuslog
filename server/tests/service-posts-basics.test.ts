@@ -44,7 +44,6 @@ describe('POST /event basically works.', () => {
 			.send({
 				"entity": "demo1",
 				"value": "g",
-				"timestamp": "2001-12-24T12:06:00",
 				"validFor": 1
 			})
 			.expect(200)

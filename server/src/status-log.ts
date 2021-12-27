@@ -69,7 +69,7 @@ function cleanEvent(i: Event): Event {
 	return cleanObject({
 		entity: i.entity,
 		value: i.value,
-		timestamp: i.timestamp,
+		timestamp: i.timestamp ?? new Date(),
 		validFor: i.validFor,
 		text: i.text,
 		link: i.link

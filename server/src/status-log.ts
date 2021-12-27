@@ -4,6 +4,8 @@
 // Available under MIT LICENSE
 //
 
+import { toUSVString } from "util";
+
 function cleanObject(i: any): any {
 	// remove undefined properties from object
 	Object.keys(i).forEach(key => {
@@ -130,7 +132,7 @@ export class StatusLog {
 	protected postEvent(ev: Event): EventId {
 		// ensure entity exists
 		if (!this.entities.has(ev.entity)) {
-			this.entities.set(ev.entity, {} as Entity)
+			this.entities.set(ev.entity, cleanEntity({} as Entity))
 		}
 
 		// store event
@@ -142,6 +144,25 @@ export class StatusLog {
 		// cleanup
 
 		// TODO
+
+		return id;
+	}
+
+	protected postFutureValue(fv: FutureValue): FutureValueId {
+		// ensure entity type exists
+		if (fv.type && !this.entityTypes.has(fv.type)) {
+			this.entityTypes.set(fv.type, cleanEntityType({} as EntityType))
+		}
+		// ensure entity exists
+		if (fv.entity && !this.entities.has(fv.entity)) {
+			let ne = {} as Entity;
+			if (fv.type) ne.type = fv.type;
+			this.entities.set(fv.entity, cleanEntity(ne))
+		}
+
+		// story future value
+		const id = this.nextFutureValueId++;
+		this.futureValues.set(id, cleanFutureValue(fv));
 
 		return id;
 	}

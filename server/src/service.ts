@@ -34,7 +34,7 @@ export class StatusLogService extends StatusLog {
 		app.get(`${this.apiRoot}type/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.patch(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
-		app.post(`${this.apiRoot}future-value/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.post(`${this.apiRoot}future-value/`, this.postFutureValueHandler.bind(this));
 		app.get(`${this.apiRoot}future-value/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}future-value/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.get(this.apiRoot, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
@@ -93,6 +93,28 @@ export class StatusLogService extends StatusLog {
 		if (this.hasEntityType(ty.id)) return res.status(409).send('Type known');
 
 		const id = this.postEntityType(ty.id, ty);
+		return res.status(200).send({ "id": id });
+	}
+
+	private postFutureValueHandler(req: Request, res: Response): Response {
+		let fv = req.body as FutureValue;
+		if (!fv) return res.status(400).send('Malformed request');
+
+		if (!fv.value) return res.status(400).send('Missing value');
+		if (fv.value !== 'e'
+			&& fv.value !== 'w'
+			&& fv.value !== 'g'
+			&& fv.value !== 'n'
+			&& fv.value !== 'd') return res.status(400).send('Malformed value');
+
+		if (!fv.validFor) return res.status(400).send('Missing validFor');
+		if (typeof (fv.validFor) !== 'number') return res.status(400).send('Malformed validFor');
+		if (fv.validFor <= 0) return res.status(400).send('Non-positive validFor');
+
+		if (fv.text && typeof (fv.text) !== 'string') return res.status(400).send('Malformed text');
+		if (fv.link && typeof (fv.link) !== 'string') return res.status(400).send('Malformed link');
+
+		const id = this.postFutureValue(fv);
 		return res.status(200).send({ "id": id });
 	}
 

@@ -22,6 +22,9 @@ export interface EntityType {
 	text: string | null,
 	link: string | null
 }
+export interface EntityTypeWithId extends EntityType {
+	id: EntityTypeId
+}
 
 function cleanEntityType(i: EntityType): EntityType {
 	// explicitly copy only known values
@@ -41,6 +44,9 @@ export interface Entity {
 	maxCount: number | null,
 	text: string | null,
 	link: string | null
+}
+export interface EntityWithId extends Entity {
+	id: EntityId
 }
 
 function cleanEntity(i: Entity): Entity {
@@ -62,6 +68,9 @@ export interface Event {
 	validFor: number,
 	text: string | null,
 	link: string | null
+}
+export interface EventWithId extends Event {
+	id: EventId
 }
 
 function cleanEvent(i: Event): Event {
@@ -85,6 +94,9 @@ export interface FutureValue {
 	text: string | null,
 	link: string | null
 }
+export interface FutureValueWithId extends FutureValue {
+	id: FutureValueId
+}
 
 function cleanFutureValue(i: FutureValue): FutureValue {
 	// explicitly copy only known values
@@ -102,7 +114,7 @@ export class StatusLog {
 
 	private entities: Map<EntityId, Entity> = new Map<EntityId, Entity>();
 	private entityTypes: Map<EntityTypeId, EntityType> = new Map<EntityTypeId, EntityType>();
-	private events: Map<EventId, Event> = new Map<EventId, Event>();
+	private events: Array<EventWithId> = new Array<EventWithId>();
 	private nextEventId: EventId = 1;
 	private futureValues: Map<FutureValueId, FutureValue> = new Map<FutureValueId, FutureValue>();
 	private nextFutureValueId: FutureValueId = 1;
@@ -135,7 +147,7 @@ export class StatusLog {
 
 		// store event
 		const id = this.nextEventId++;
-		this.events.set(id, cleanEvent(ev));
+		this.events.push({...ev, id: id} as EventWithId);
 		// console.log(`Posted event [${id}]:`);
 		// console.log(this.events.get(id));
 
@@ -144,6 +156,25 @@ export class StatusLog {
 		// TODO
 
 		return id;
+	}
+
+	protected getEvents(limit: number, startId: EventId, entity: EntityId | null, link: string | null): Array<EventWithId> {
+		return this.events.filter(
+			(e: EventWithId): boolean => {
+				if (entity !== null && e.entity !== entity) return false;
+				if (link !== null && e.link !== link) return false;
+				if (e.id < startId) return false;
+				return true;
+			})
+			.sort((a, b) => (a.id - b.id))
+			.slice(0, limit);
+	}
+
+	protected deleteEvent(id: EventId): boolean {
+		const idx = this.events.findIndex((e: EventWithId): boolean => e.id === id)
+		if (idx < 0) return false;
+		this.events.splice(idx, 1);
+		return true;
 	}
 
 	protected postFutureValue(fv: FutureValue): FutureValueId {

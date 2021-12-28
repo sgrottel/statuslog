@@ -29,3 +29,9 @@ Using Jest:
 npm run test
 ```
 Then inspect: ./coverage/lcov-report/index.html
+
+## Powershell Debugging During Development
+```
+for ($i = 1; $i -le 10; $i++) { $c = Invoke-WebRequest -Method "POST" -Uri "http://localhost:8000/status/event/" -Headers @{ "Content-Type"="application/json" }  -Body ( @{entity='e1';value='g';validFor=1;link="http://$i"} | ConvertTo-Json) }
+invoke-webrequest http://localhost:8000/status/event/?limit=4
+```

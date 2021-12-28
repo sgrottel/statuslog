@@ -112,42 +112,85 @@ function cleanFutureValue(i: FutureValue): FutureValue {
 
 export class StatusLog {
 
-	private entities: Map<EntityId, Entity> = new Map<EntityId, Entity>();
-	private entityTypes: Map<EntityTypeId, EntityType> = new Map<EntityTypeId, EntityType>();
+	private entities: Array<EntityWithId> = new Array<EntityWithId>();
+	private entityTypes: Array<EntityTypeWithId> = new Array<EntityTypeWithId>();
 	private events: Array<EventWithId> = new Array<EventWithId>();
 	private nextEventId: EventId = 1;
 	private futureValues: Array<FutureValueWithId> = new Array<FutureValueWithId>();
 	private nextFutureValueId: FutureValueId = 1;
 
-	protected hasEntity(id: EntityId) : boolean {
-		return this.entities.has(id);
+	protected hasEntity(id: EntityId): boolean {
+		return this.entities.findIndex((e: EntityWithId) => e.id === id) >= 0;
 	}
 
 	protected postEntity(id: EntityId, ty: Entity): EntityId {
-		if (this.entities.has(id)) throw new RangeError("id conflict");
-		this.entities.set(id, cleanEntity(ty));
+		if (this.hasEntity(id)) throw new RangeError("id conflict");
+		this.entities.push({ ...cleanEntity(ty), id: id } as EntityWithId);
 		return id;
 	}
 
-	protected hasEntityType(id: EntityTypeId) : boolean {
-		return this.entityTypes.has(id);
+	protected getEntity(limit: number, startId: EntityId | null, type: EntityTypeId | null, link: string | null): Array<EntityTypeWithId> {
+		return this.entities.filter(
+			(e: EntityWithId): boolean => {
+				if (link !== null && e.link !== link) return false;
+				if (type !== null && e.type !== link) return false;
+				if (startId !== null && e.id < startId) return false;
+				return true;
+			})
+			.sort((a, b) => a.id.localeCompare(b.id))
+			.slice(0, limit);
+	}
+
+	protected deleteEntity(id: EntityId): boolean {
+		const idx = this.entities.findIndex((e: EntityWithId): boolean => e.id === id)
+		if (idx < 0) return false;
+		this.entities.splice(idx, 1);
+
+		// TODO: cleanup
+
+		return true;
+	}
+
+	protected hasEntityType(id: EntityTypeId): boolean {
+		return this.entityTypes.findIndex((et: EntityTypeWithId) => et.id === id) >= 0;
 	}
 
 	protected postEntityType(id: EntityTypeId, ty: EntityType): EntityTypeId {
-		if (this.entityTypes.has(id)) throw new RangeError("id conflict");
-		this.entityTypes.set(id, cleanEntityType(ty));
+		if (this.hasEntityType(id)) throw new RangeError("id conflict");
+		this.entityTypes.push({ ...cleanEntityType(ty), id: id } as EntityTypeWithId);
 		return id;
+	}
+
+	protected getEntityType(limit: number, startId: EntityTypeId | null, link: string | null): Array<EntityTypeWithId> {
+		return this.entityTypes.filter(
+			(et: EntityTypeWithId): boolean => {
+				if (link !== null && et.link !== link) return false;
+				if (startId !== null && et.id < startId) return false;
+				return true;
+			})
+			.sort((a, b) => a.id.localeCompare(b.id))
+			.slice(0, limit);
+	}
+
+	protected deleteEntityType(id: EntityTypeId): boolean {
+		const idx = this.entityTypes.findIndex((et: EntityTypeWithId): boolean => et.id === id)
+		if (idx < 0) return false;
+		this.entityTypes.splice(idx, 1);
+
+		// TODO: cleanup
+
+		return true;
 	}
 
 	protected postEvent(ev: Event): EventId {
 		// ensure entity exists
-		if (!this.entities.has(ev.entity)) {
-			this.entities.set(ev.entity, cleanEntity({} as Entity))
+		if (!this.hasEntity(ev.entity)) {
+			this.postEntity(ev.entity, cleanEntity({} as Entity))
 		}
 
 		// store event
 		const id = this.nextEventId++;
-		this.events.push({...ev, id: id} as EventWithId);
+		this.events.push({ ...cleanEvent(ev), id: id } as EventWithId);
 		// console.log(`Posted event [${id}]:`);
 		// console.log(this.events.get(id));
 
@@ -179,24 +222,24 @@ export class StatusLog {
 
 	protected postFutureValue(fv: FutureValue): FutureValueId {
 		// ensure entity type exists
-		if (fv.type && !this.entityTypes.has(fv.type)) {
-			this.entityTypes.set(fv.type, cleanEntityType({} as EntityType))
+		if (fv.type && !this.hasEntityType(fv.type)) {
+			this.postEntityType(fv.type, cleanEntityType({} as EntityType))
 		}
 		// ensure entity exists
-		if (fv.entity && !this.entities.has(fv.entity)) {
+		if (fv.entity && !this.hasEntity(fv.entity)) {
 			let ne = {} as Entity;
 			if (fv.type) ne.type = fv.type;
-			this.entities.set(fv.entity, cleanEntity(ne))
+			this.postEntity(fv.entity, cleanEntity(ne))
 		}
 
 		// story future value
 		const id = this.nextFutureValueId++;
-		this.futureValues.push({...cleanFutureValue(fv), id: id} as FutureValueWithId);
+		this.futureValues.push({ ...cleanFutureValue(fv), id: id } as FutureValueWithId);
 
 		return id;
 	}
 
-	protected getFutureValue(limit: number, startId: FutureValueId, entity: EntityId | null,  type: EntityTypeId | null, link: string | null): Array<FutureValueWithId> {
+	protected getFutureValue(limit: number, startId: FutureValueId, entity: EntityId | null, type: EntityTypeId | null, link: string | null): Array<FutureValueWithId> {
 		return this.futureValues.filter(
 			(v: FutureValueWithId): boolean => {
 				if (entity !== null && v.entity !== entity) return false;

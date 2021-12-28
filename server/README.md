@@ -40,4 +40,12 @@ for ($i = 1; $i -le 10; $i++) { $c = Invoke-WebRequest -Method "POST" -Uri "http
 
 invoke-webrequest http://localhost:8000/status/future-value/ | ConvertFrom-Json
 
+for ($i = 1; $i -le 10; $i++) { $c = Invoke-WebRequest -Method "POST" -Uri "http://localhost:8000/status/type/" -Headers @{ "Content-Type"="application/json" } -Body ( @{ id="t$i";link="http://$i"} | ConvertTo-Json) }
+
+invoke-webrequest http://localhost:8000/status/type/ | ConvertFrom-Json
+
+for ($i = 1; $i -le 10; $i++) { $c = Invoke-WebRequest -Method "POST" -Uri "http://localhost:8000/status/entity/" -Headers @{ "Content-Type"="application/json" } -Body ( @{ id="e$i";link="http://e-$i"} | ConvertTo-Json) }
+
+invoke-webrequest http://localhost:8000/status/entity/ | ConvertFrom-Json
+
 ```

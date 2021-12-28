@@ -50,13 +50,13 @@ export class StatusLogService extends StatusLog {
 		app.get(`${this.apiRoot}event/`, this.getEventHandler.bind(this));
 		app.delete(`${this.apiRoot}event/:id`, this.deleteEventHandler.bind(this));
 		app.post(`${this.apiRoot}entity/`, this.postEntityHandler.bind(this));
-		app.get(`${this.apiRoot}entity/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.get(`${this.apiRoot}entity/`, this.getEntityHandler.bind(this));
 		app.patch(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
-		app.delete(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.delete(`${this.apiRoot}entity/:id`, this.deleteEntityHandler.bind(this));
 		app.post(`${this.apiRoot}type/`, this.postTypeHandler.bind(this));
-		app.get(`${this.apiRoot}type/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.get(`${this.apiRoot}type/`, this.getTypeHandler.bind(this));
 		app.patch(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
-		app.delete(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.delete(`${this.apiRoot}type/:id`, this.deleteTypeHandler.bind(this));
 		app.post(`${this.apiRoot}future-value/`, this.postFutureValueHandler.bind(this));
 		app.get(`${this.apiRoot}future-value/`, this.getFutureValueHandler.bind(this));
 		app.delete(`${this.apiRoot}future-value/:id`, this.deleteFutureValueHandler.bind(this));
@@ -126,6 +126,30 @@ export class StatusLogService extends StatusLog {
 		return res.status(200).send({ "id": id });
 	}
 
+	private getEntityHandler(req: Request, res: Response): Response {
+		// query parameters
+		const limit: number = queryNumber(req.query.limit, 100);
+		if (Number.isNaN(limit)) return res.status(400).send('malformed limit');
+		if (limit < 1) return res.status(400).send('Non-positive limit');
+		const startId: EntityId = queryEntityId(req.query.startid) as EntityId;
+		const type: EntityTypeId | null = queryEntityTypeId(req.query.type);
+		const link: string | null = queryString(req.query.link);
+
+		const entities = this.getEntity(limit, startId, type, link);
+		return res.status(200).send(entities);
+	}
+
+	private deleteEntityHandler(req: Request, res: Response): Response {
+		const id: EntityId = queryEntityId(req.params.id) as EntityId;
+		if (id === null) return res.status(400).send('malformed id');
+		const r = this.deleteEntity(id);
+		if (!r) return res.sendStatus(404);
+
+		// TODO: Cleanup all references to entity
+
+		return res.sendStatus(203);
+	}
+
 	private postTypeHandler(req: Request, res: Response): Response {
 		let ty = req.body as EntityTypeWithId;
 		if (!ty) return res.status(400).send('Malformed request');
@@ -140,6 +164,29 @@ export class StatusLogService extends StatusLog {
 
 		const id = this.postEntityType(ty.id, ty);
 		return res.status(200).send({ "id": id });
+	}
+
+	private getTypeHandler(req: Request, res: Response): Response {
+		// query parameters
+		const limit: number = queryNumber(req.query.limit, 100);
+		if (Number.isNaN(limit)) return res.status(400).send('malformed limit');
+		if (limit < 1) return res.status(400).send('Non-positive limit');
+		const startId: EntityTypeId = queryEntityTypeId(req.query.startid) as EntityTypeId;
+		const link: string | null = queryString(req.query.link);
+
+		const types = this.getEntityType(limit, startId, link);
+		return res.status(200).send(types);
+	}
+
+	private deleteTypeHandler(req: Request, res: Response): Response {
+		const id: EntityTypeId = queryEntityTypeId(req.params.id) as EntityTypeId;
+		if (id === null) return res.status(400).send('malformed id');
+		const r = this.deleteEntityType(id);
+		if (!r) return res.sendStatus(404);
+
+		// TODO: Cleanup all references to type
+
+		return res.sendStatus(203);
 	}
 
 	private postFutureValueHandler(req: Request, res: Response): Response {

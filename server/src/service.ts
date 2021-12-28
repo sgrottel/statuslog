@@ -4,7 +4,7 @@
 // Available under MIT LICENSE
 //
 import { Application, Request, Response } from 'express';
-import { StatusLog, Event, FutureValue, EntityId, EventId, EntityTypeWithId, EntityWithId } from './status-log';
+import { StatusLog, Event, FutureValue, EntityId, EventId, EntityTypeWithId, EntityWithId, FutureValueId, EntityTypeId } from './status-log';
 
 function queryNumber(q: any, d: number): number {
 	if (q === undefined || q === null) return d;
@@ -20,6 +20,16 @@ function queryEntityId(q: any): EntityId | null {
 	if (q === undefined || q === null) return null;
 	if (typeof q === 'string') return q as EntityId;
 	return null;
+}
+function queryEntityTypeId(q: any): EntityTypeId | null {
+	if (q === undefined || q === null) return null;
+	if (typeof q === 'string') return q as EntityTypeId;
+	return null;
+}
+function queryFutureValueId(q: any, d: FutureValueId): FutureValueId {
+	if (q === undefined || q === null) return d;
+	if (typeof q === 'string') return parseInt(q) as FutureValueId;
+	return Number.NaN as FutureValueId;
 }
 function queryString(q: any): string | null {
 	if (q === undefined || q === null) return null;
@@ -48,8 +58,8 @@ export class StatusLogService extends StatusLog {
 		app.patch(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.delete(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 		app.post(`${this.apiRoot}future-value/`, this.postFutureValueHandler.bind(this));
-		app.get(`${this.apiRoot}future-value/`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
-		app.delete(`${this.apiRoot}future-value/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.get(`${this.apiRoot}future-value/`, this.getFutureValueHandler.bind(this));
+		app.delete(`${this.apiRoot}future-value/:id`, this.deleteFutureValueHandler.bind(this));
 		app.get(this.apiRoot, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
 	}
 
@@ -153,5 +163,30 @@ export class StatusLogService extends StatusLog {
 		const id = this.postFutureValue(fv);
 		return res.status(200).send({ "id": id });
 	}
+
+	private getFutureValueHandler(req: Request, res: Response): Response {
+		// query parameters
+		const limit: number = queryNumber(req.query.limit, 100);
+		if (Number.isNaN(limit)) return res.status(400).send('malformed limit');
+		if (limit < 1) return res.status(400).send('Non-positive limit');
+		const startId: FutureValueId = queryFutureValueId(req.query.startid, 0);
+		if (Number.isNaN(startId)) return res.status(400).send('malformed startId');
+		if (startId < 0) return res.status(400).send('Invalid startId');
+		const entity: EntityId | null = queryEntityId(req.query.entity);
+		const type: EntityTypeId | null = queryEntityTypeId(req.query.type);
+		const link: string | null = queryString(req.query.link);
+
+		const events = this.getFutureValue(limit, startId, entity, type, link);
+		return res.status(200).send(events);
+	}
+
+	private deleteFutureValueHandler(req: Request, res: Response): Response {
+		const id: FutureValueId = queryFutureValueId(req.params.id, Number.NaN);
+		if (Number.isNaN(id)) return res.status(400).send('malformed id');
+		const r = this.deleteFutureValue(id);
+		if (!r) return res.sendStatus(404);
+		return res.sendStatus(203);
+	}
+
 
 }

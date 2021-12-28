@@ -116,7 +116,7 @@ export class StatusLog {
 	private entityTypes: Map<EntityTypeId, EntityType> = new Map<EntityTypeId, EntityType>();
 	private events: Array<EventWithId> = new Array<EventWithId>();
 	private nextEventId: EventId = 1;
-	private futureValues: Map<FutureValueId, FutureValue> = new Map<FutureValueId, FutureValue>();
+	private futureValues: Array<FutureValueWithId> = new Array<FutureValueWithId>();
 	private nextFutureValueId: FutureValueId = 1;
 
 	protected hasEntity(id: EntityId) : boolean {
@@ -191,9 +191,29 @@ export class StatusLog {
 
 		// story future value
 		const id = this.nextFutureValueId++;
-		this.futureValues.set(id, cleanFutureValue(fv));
+		this.futureValues.push({...cleanFutureValue(fv), id: id} as FutureValueWithId);
 
 		return id;
+	}
+
+	protected getFutureValue(limit: number, startId: FutureValueId, entity: EntityId | null,  type: EntityTypeId | null, link: string | null): Array<FutureValueWithId> {
+		return this.futureValues.filter(
+			(v: FutureValueWithId): boolean => {
+				if (entity !== null && v.entity !== entity) return false;
+				if (type !== null && v.type !== type) return false;
+				if (link !== null && v.link !== link) return false;
+				if (v.id < startId) return false;
+				return true;
+			})
+			.sort((a, b) => (a.id - b.id))
+			.slice(0, limit);
+	}
+
+	protected deleteFutureValue(id: FutureValueId): boolean {
+		const idx = this.futureValues.findIndex((v: FutureValueWithId): boolean => v.id === id)
+		if (idx < 0) return false;
+		this.futureValues.splice(idx, 1);
+		return true;
 	}
 
 }

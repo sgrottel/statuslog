@@ -142,10 +142,12 @@ export class StatusLogService extends StatusLog {
 	private deleteEntityHandler(req: Request, res: Response): Response {
 		const id: EntityId = queryEntityId(req.params.id) as EntityId;
 		if (id === null) return res.status(400).send('malformed id');
+
+		if (this.getEvents(1, 0, id, null).length > 0) return res.status(409).send('conflict: entity still referenced by events');
+		if (this.getFutureValue(1, 0, id, null, null).length > 0) return res.status(409).send('conflict: entity still referenced by future values');
+
 		const r = this.deleteEntity(id);
 		if (!r) return res.sendStatus(404);
-
-		// TODO: Cleanup all references to entity
 
 		return res.sendStatus(203);
 	}
@@ -181,10 +183,12 @@ export class StatusLogService extends StatusLog {
 	private deleteTypeHandler(req: Request, res: Response): Response {
 		const id: EntityTypeId = queryEntityTypeId(req.params.id) as EntityTypeId;
 		if (id === null) return res.status(400).send('malformed id');
+
+		if (this.getEntity(1, null, id, null).length > 0) return res.status(409).send('conflict: type still referenced by entities');
+		if (this.getFutureValue(1, 0, null, id, null).length > 0) return res.status(409).send('conflict: type still referenced by future values');
+
 		const r = this.deleteEntityType(id);
 		if (!r) return res.sendStatus(404);
-
-		// TODO: Cleanup all references to type
 
 		return res.sendStatus(203);
 	}

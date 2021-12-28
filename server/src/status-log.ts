@@ -144,9 +144,11 @@ export class StatusLog {
 	protected deleteEntity(id: EntityId): boolean {
 		const idx = this.entities.findIndex((e: EntityWithId): boolean => e.id === id)
 		if (idx < 0) return false;
-		this.entities.splice(idx, 1);
 
-		// TODO: cleanup
+		if (this.events.findIndex((e: EventWithId) : boolean => e.entity === id) >= 0) return false; // conflict
+		if (this.futureValues.findIndex((v: FutureValueWithId) : boolean => v.entity === id) >= 0) return false; // conflict
+
+		this.entities.splice(idx, 1);
 
 		return true;
 	}
@@ -175,9 +177,11 @@ export class StatusLog {
 	protected deleteEntityType(id: EntityTypeId): boolean {
 		const idx = this.entityTypes.findIndex((et: EntityTypeWithId): boolean => et.id === id)
 		if (idx < 0) return false;
-		this.entityTypes.splice(idx, 1);
 
-		// TODO: cleanup
+		if (this.entities.findIndex((e: EntityWithId) : boolean => e.type === id) >= 0) return false; // conflict
+		if (this.futureValues.findIndex((v: FutureValueWithId) : boolean => v.type === id) >= 0) return false; // conflict
+
+		this.entityTypes.splice(idx, 1);
 
 		return true;
 	}

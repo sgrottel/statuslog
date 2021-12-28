@@ -4,7 +4,7 @@
 // Available under MIT LICENSE
 //
 import { Application, Request, Response } from 'express';
-import { StatusLog, Event, FutureValue, EntityId, EventId, EntityTypeWithId, EntityWithId, FutureValueId, EntityTypeId } from './status-log';
+import { StatusLog, Event, FutureValue, EntityId, EventId, EntityTypeWithId, EntityWithId, FutureValueId, EntityTypeId, Entity, EntityType } from './status-log';
 
 function queryNumber(q: any, d: number): number {
 	if (q === undefined || q === null) return d;
@@ -51,11 +51,11 @@ export class StatusLogService extends StatusLog {
 		app.delete(`${this.apiRoot}event/:id`, this.deleteEventHandler.bind(this));
 		app.post(`${this.apiRoot}entity/`, this.postEntityHandler.bind(this));
 		app.get(`${this.apiRoot}entity/`, this.getEntityHandler.bind(this));
-		app.patch(`${this.apiRoot}entity/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.patch(`${this.apiRoot}entity/:id`, this.patchEntityHandler.bind(this));
 		app.delete(`${this.apiRoot}entity/:id`, this.deleteEntityHandler.bind(this));
 		app.post(`${this.apiRoot}type/`, this.postTypeHandler.bind(this));
 		app.get(`${this.apiRoot}type/`, this.getTypeHandler.bind(this));
-		app.patch(`${this.apiRoot}type/:id`, (req: Request, res: Response): Response => { return res.status(500).send('not implemented'); });
+		app.patch(`${this.apiRoot}type/:id`, this.patchTypeHandler.bind(this));
 		app.delete(`${this.apiRoot}type/:id`, this.deleteTypeHandler.bind(this));
 		app.post(`${this.apiRoot}future-value/`, this.postFutureValueHandler.bind(this));
 		app.get(`${this.apiRoot}future-value/`, this.getFutureValueHandler.bind(this));
@@ -139,6 +139,15 @@ export class StatusLogService extends StatusLog {
 		return res.status(200).send(entities);
 	}
 
+	private patchEntityHandler(req: Request, res: Response): Response {
+		const id: EntityId = queryEntityId(req.params.id) as EntityId;
+		if (id === null) return res.status(400).send('malformed id');
+		if (!this.hasEntity(id)) return res.sendStatus(404);
+		let en = req.body as Entity;
+		this.patchEntity(id, en);
+		return res.sendStatus(203);
+	}
+
 	private deleteEntityHandler(req: Request, res: Response): Response {
 		const id: EntityId = queryEntityId(req.params.id) as EntityId;
 		if (id === null) return res.status(400).send('malformed id');
@@ -178,6 +187,23 @@ export class StatusLogService extends StatusLog {
 
 		const types = this.getEntityType(limit, startId, link);
 		return res.status(200).send(types);
+	}
+
+	private patchTypeHandler(req: Request, res: Response): Response {
+		const id: EntityTypeId = queryEntityTypeId(req.params.id) as EntityTypeId;
+		if (id === null) return res.status(400).send('malformed id');
+		if (!this.hasEntityType(id)) return res.sendStatus(404);
+
+		let ty = req.body as EntityType;
+		if (!ty) return res.status(400).send('Malformed request');
+
+		if (!ty.maxAge
+			&& !ty.maxCount
+			&& !ty.text
+			&& !ty.link) return res.status(400).send('Empty type');
+
+		this.patchEntityType(id, ty);
+		return res.sendStatus(203);
 	}
 
 	private deleteTypeHandler(req: Request, res: Response): Response {

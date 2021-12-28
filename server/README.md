@@ -48,4 +48,8 @@ for ($i = 1; $i -le 10; $i++) { $c = Invoke-WebRequest -Method "POST" -Uri "http
 
 invoke-webrequest http://localhost:8000/status/entity/ | ConvertFrom-Json
 
+
+Invoke-WebRequest -Method "POST" -Uri "http://localhost:8000/status/entity/" -Headers @{ "Content-Type"="application/json" } -Body ( @{ id="e1";link="http://e-1"} | ConvertTo-Json)
+Invoke-WebRequest -Uri "http://localhost:8000/status/entity/" | ConvertFrom-Json
+Invoke-WebRequest -Method "PATCH" -Uri "http://localhost:8000/status/entity/e1" -Headers @{ "Content-Type"="application/json" } -Body ( @{ link=$null } | ConvertTo-Json)
 ```

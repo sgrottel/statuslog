@@ -123,10 +123,44 @@ export class StatusLog {
 		return this.entities.findIndex((e: EntityWithId) => e.id === id) >= 0;
 	}
 
-	protected postEntity(id: EntityId, ty: Entity): EntityId {
+	protected postEntity(id: EntityId, en: Entity): EntityId {
 		if (this.hasEntity(id)) throw new RangeError("id conflict");
-		this.entities.push({ ...cleanEntity(ty), id: id } as EntityWithId);
+
+		// ensure entity type exists
+		if (en.type && !this.hasEntityType(en.type)) {
+			this.postEntityType(en.type, cleanEntityType({} as EntityType))
+		}
+
+		this.entities.push({ ...cleanEntity(en), id: id } as EntityWithId);
 		return id;
+	}
+
+	protected patchEntity(id: EntityId, en: Entity): void {
+		const idx = this.entities.findIndex((e: EntityWithId) => e.id === id);
+		if (idx < 0) throw new RangeError("id not found");
+
+		const e = cleanEntity(en);
+		if (e.type !== undefined) {
+			if (e.type !== null) {
+				// ensure entity type exists
+				if (e.type && !this.hasEntityType(e.type)) {
+					this.postEntityType(e.type, cleanEntityType({} as EntityType))
+				}
+			}
+			this.entities[idx].type = e.type;
+		}
+		if (e.maxAge !== undefined) {
+			this.entities[idx].maxAge = e.maxAge;
+		}
+		if (e.maxCount !== undefined) {
+			this.entities[idx].maxCount = e.maxCount;
+		}
+		if (e.text !== undefined) {
+			this.entities[idx].text = e.text; 
+		}
+		if (e.link !== undefined) {
+			this.entities[idx].link = e.link;
+		}
 	}
 
 	protected getEntity(limit: number, startId: EntityId | null, type: EntityTypeId | null, link: string | null): Array<EntityTypeWithId> {
@@ -161,6 +195,24 @@ export class StatusLog {
 		if (this.hasEntityType(id)) throw new RangeError("id conflict");
 		this.entityTypes.push({ ...cleanEntityType(ty), id: id } as EntityTypeWithId);
 		return id;
+	}
+
+	protected patchEntityType(id: EntityTypeId, ty: EntityType): void {
+		const idx = this.entityTypes.findIndex((et: EntityTypeWithId) => et.id === id);
+		if (idx < 0) throw new RangeError("id not found");
+
+		if (ty.maxAge !== undefined) {
+			this.entityTypes[idx].maxAge = ty.maxAge;
+		}
+		if (ty.maxCount !== undefined) {
+			this.entityTypes[idx].maxCount = ty.maxCount;
+		}
+		if (ty.text !== undefined) {
+			this.entityTypes[idx].text = ty.text; 
+		}
+		if (ty.link !== undefined) {
+			this.entityTypes[idx].link = ty.link;
+		}
 	}
 
 	protected getEntityType(limit: number, startId: EntityTypeId | null, link: string | null): Array<EntityTypeWithId> {

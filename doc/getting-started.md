@@ -43,8 +43,40 @@ Evaluation:
 
 
 ## Future Value Extrapolation
+All status values have a life time `validFor` specifying the time frame starting at their post time stamp, in which the value is active.
+Reaching the end of this time frame has a semantic meaning, e.g. that the status lost it's meaning.
+A system, which continuously reports it's status should have sent a new status event before this end, to replace the previous event with updated information.
+If such an event was not sent, this has semantic meaning as well.
 
-TODO
+Such meaning is modeled with `future values`.
+The system can store multiple future values.
+Those can be assigned to entities or to entity types.
+A future value can be considered an event _template_, which starts as soon as the last explicit status event reached it's end time.
+
+All future values applicable to an entity form a stack.
+They are sorted first by future values for the entity, then future values for the time, and then sorted by their `validFor` time spans, starting with the shortest.
+All future values start as soon as the last explicit event ends.
+Opposed to explicit events, they do not overwrite each other.
+They are evaluated following the sort order on their stack.
+
+### Example
+Setup:
+* Entity `e` has the type `t` and one last active event `ev1` with value `g`
+* Future Value `v1` references entity `e` and is `validFor = 1.0` with value `w`
+* Future Value `v2` references entity `e` and is `validFor = 3.0` with value `e`
+* Future Value `v3` references type `t` and is `validFor = 2.0` with value `n`
+* Future Value `v4` references type `t` and is `validFor = 4.0` with value `d`
+
+![Example future value provide status value extrapolation](./getting-started-eval-example-2.svg)
+_Image: future values provide status value extrapolation_
+
+Evaluation:
+* At time `-0.5` before the event `ev1` ends, that event specifies the value `g`
+* At time `0.5` after the event `ev1` ended, the future value `v1` yields `w`
+* At time `1.5` the future value `v2` yields `e`
+* The future value `v3` will never be activated in this setup, as it is overruled by `v1` and `v2` specified for the entity.
+* At time `3.5` the future value `v4` yields `d`
+* After time `4`and beyond, any evaluation for `e` will yield `null`, or the system might forget the entity altogether.
 
 
 ## Posting Status Event

@@ -27,6 +27,9 @@ Setup:
 * Event 1 is posted at `2021-12-25T10:00` with value `e`, and is valid for `3` days.
 * Event 2 is posted at `2021-12-26T10:00` with value `w`, and is valid for `1` day.
 
+![Example evaluation of overlapping events](./getting-started-eval-example-1.svg)
+_Image: Example evaluation of overlapping events_
+
 Evaluation:
 * Evaluating at `2021-12-25T18:00` will yield `e`
 	* as Event 1 is active,
@@ -37,6 +40,11 @@ Evaluation:
 	* Assuming that no value extrapolation has been set up for this entity.
 	* Event 2 is no longer active as it reached it's end time (`timestamp + validFor days`), and
 	* Event 1 is no longer active as it had been overwritten by Event 2.
+
+
+## Future Value Extrapolation
+
+TODO
 
 
 ## Posting Status Event
@@ -88,3 +96,7 @@ The second core functionality of the service is to provide a summary of the eval
 This is provided by the route: [GET `/status/`](./api.md#get-status)
 
 TODO
+
+
+## License
+This project is freely available under the [MIT License](../LICENSE).

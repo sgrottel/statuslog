@@ -271,3 +271,7 @@ TODO
 This route evaluates the status of all known entries, and returns a summary with all values.
 
 TODO
+
+
+## License
+This project is freely available under the [MIT License](../LICENSE).

@@ -55,6 +55,7 @@ A future value can be considered an event _template_, which starts as soon as th
 
 All future values applicable to an entity form a stack.
 They are sorted first by future values for the entity, then future values for the time, and then sorted by their `validFor` time spans, starting with the shortest.
+If two future values for the same referenced object (entity or type) have the same length, their order is implementation dependent and therefore undefined.
 All future values start as soon as the last explicit event ends.
 Opposed to explicit events, they do not overwrite each other.
 They are evaluated following the sort order on their stack.
@@ -89,7 +90,7 @@ Let's assume, we have a service working performing a job.
 At the end of it's computation it wants to report a successful completion:
 ```python
 import requests
-request.post('https://host/status/event/',
+requests.post('https://host/status/event/',
 	headers = { 'x-api-key': 'APIKEY' }),
 	json = {
 		'entity': 'demoworker',
@@ -108,7 +109,7 @@ import requests
 
 errorMessage = 'Unexpected failure on something'
 
-request.post('https://host/status/event/',
+requests.post('https://host/status/event/',
 	headers = { 'x-api-key': 'APIKEY' }),
 	json = {
 		'entity': 'demoworker',
@@ -127,7 +128,18 @@ Similarly, simple one-liners can be made available in other programming language
 The second core functionality of the service is to provide a summary of the evaluated status of all known entities.
 This is provided by the route: [GET `/status/`](./api.md#get-status)
 
-TODO
+The route returns a simple JSON array with the minimum information on all entites, similar to [GET `/status/entity`](./api.md#get-statusentity), with some differences:
+1. For each entity, the status `value` is evaluated and provided.
+2. Entity are omitted if their status evaluation yields `null`, because no events and no future values are active.
+3. This evaluation takes place for the current time stamp, if no other value is specified.
+
+Example:
+```python
+import requests
+r = requests.get('https://host/event/',
+	headers = { 'x-api-key': 'APIKEY' })
+print(r.json())
+```
 
 
 ## License

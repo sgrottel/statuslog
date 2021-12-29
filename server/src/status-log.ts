@@ -163,7 +163,7 @@ export class StatusLog {
 		}
 	}
 
-	protected getEntity(limit: number, startId: EntityId | null, type: EntityTypeId | null, link: string | null): Array<EntityTypeWithId> {
+	protected getEntity(limit: number, startId: EntityId | null, type: EntityTypeId | null, link: string | null): Array<EntityWithId> {
 		return this.entities.filter(
 			(e: EntityWithId): boolean => {
 				if (link !== null && e.link !== link) return false;

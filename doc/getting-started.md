@@ -76,7 +76,7 @@ Evaluation:
 * At time `1.5` the future value `v2` yields `e`
 * The future value `v3` will never be activated in this setup, as it is overruled by `v1` and `v2` specified for the entity.
 * At time `3.5` the future value `v4` yields `d`
-* After time `4`and beyond, any evaluation for `e` will yield `null`, or the system might forget the entity altogether.
+* After time `4` and beyond, any evaluation for `e` will yield `null`, or the system might forget the entity altogether.
 
 
 ## Posting Status Event

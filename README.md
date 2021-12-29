@@ -47,5 +47,20 @@ There are plenty of alternatives:
 * etc.
 
 
+## Version
+This API specification is version 4.0.1
+
+### Changelog
+#### Version 4.0
+_Never published_
+
+API specification contained a design flaw, resulting in an evaluation conflict when combining status values.
+
+#### Versions before 4.0
+_Never published_
+
+All versions of this status event log API before version 4.0 were only used internally, and were not publicly available.
+
+
 ## License
 This project is freely available under the [MIT License](./LICENSE).

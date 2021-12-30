@@ -2,11 +2,12 @@
 Simple Status Event Log
 
 ## Project Statement
-This project is about creating a simple web API to post and query minimal status data.
+This project is about creating a simple web API to post and query minimal status data, only carrying as little data as an "I am here" heart beat ping.
 The data is assigned to entities, like machines, or services.
-A simple extrapolation setup allows to change status values based on the time passed since the last message was received, e.g. to model status for unresponsive services.
+A simple extrapolation model allows to change status values based on the time passed since the last received message, e.g. to model services dropping unresponsive and silent.
 
 It is not a generic log service.
+It is not a value tracking service.
 It is not a performance log service.
 It is not a time-series data base.
 
@@ -59,7 +60,7 @@ API specification contained a design flaw, resulting in an evaluation conflict w
 #### Versions before 4.0
 _Never published_
 
-All versions of this status event log API before version 4.0 were only used internally, and were not publicly available.
+All versions of this status event log API before version 4.0 were only used for private projects, and were not publicly available.
 
 
 ## License

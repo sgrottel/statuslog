@@ -144,8 +144,6 @@ A value of `null` has the same meaning as if the field is missing.
 * `link` (optional) a hyperlink to a resource with more information on the entity.
 A value of `null` has the same meaning as if the field is missing.
 
-You must specify at least one field in addition to `id`.
-
 Return values:
 * `200` in case of successfully posting the entity.
 The return message body is a JSON object returning the entity id: `{ "id": string }`.
@@ -212,21 +210,24 @@ The message body must be a json object of the following format:
 ```
 * `type` (optional) references an entity type.
 There might be an implementation dependent maximum length of the identifier.
-A value of `null` has the same meaning as if the field is missing.
+A value of `null` will unset the stored value.
+If the field is missing the stored value is not changed.
 * `maxAge` (optional) specifies the maximum number of days an event must be stored for this entity.
 This is a hint.
 An implementation does not have to delete older events, nor does it not have to guarantee to keep newer events.
-A value of `null` has the same meaning as if the field is missing.
+A value of `null` will unset the stored value.
+If the field is missing the stored value is not changed.
 * `maxCount` (optional) specifies the maximum number of events to store for this entity.
 This is a hint.
 An implementation does not have to delete events beyond the limit, nor does it have to guarantee storage for fewer events.
-A value of `null` has the same meaning as if the field is missing.
+A value of `null` will unset the stored value.
+If the field is missing the stored value is not changed.
 * `text` (optional) a human-readable text providing more information for the entity.
-A value of `null` has the same meaning as if the field is missing.
+A value of `null` will unset the stored value.
+If the field is missing the stored value is not changed.
 * `link` (optional) a hyperlink to a resource with more information on the entity.
-A value of `null` has the same meaning as if the field is missing.
-
-You must specify at least one field.
+A value of `null` will unset the stored value.
+If the field is missing the stored value is not changed.
 
 Return values:
 * `203` in case of successfully changing the entity.

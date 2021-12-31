@@ -166,11 +166,6 @@ export class StatusLogService extends StatusLog {
 		if (!ty) return res.status(400).send('Malformed request');
 		if (!ty.id) return res.status(400).send('Missing id');
 
-		if (!ty.maxAge
-			&& !ty.maxCount
-			&& !ty.text
-			&& !ty.link) return res.status(400).send('Empty type');
-
 		if (this.hasEntityType(ty.id)) return res.status(409).send('Type known');
 
 		const id = this.postEntityType(ty.id, ty);
@@ -196,11 +191,6 @@ export class StatusLogService extends StatusLog {
 
 		let ty = req.body as EntityType;
 		if (!ty) return res.status(400).send('Malformed request');
-
-		if (!ty.maxAge
-			&& !ty.maxCount
-			&& !ty.text
-			&& !ty.link) return res.status(400).send('Empty type');
 
 		this.patchEntityType(id, ty);
 		return res.sendStatus(203);

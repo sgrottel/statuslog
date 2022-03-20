@@ -1,34 +1,45 @@
-# sg.statuslog
+# sg.StatusLog
 Simple Status Event Log
+
 
 ## Project Statement
 This project is about creating a simple web API to post and query minimal status data.
 The data is assigned to entities, like machines, or services.
 A simple extrapolation setup allows to change status values based on the time passed since the last message was received, e.g. to model status for unresponsive services.
 
+**Example**:
+```json
+{
+	"entity": "My Worker 03",
+	"status": "Warning",
+	"timestamp": "2021-12-25T10:28:01",
+	"validuntil": "2021-12-25T11:28:01",
+	"description": "HDD storage warning"
+}
+```
+
 It is not a generic log service.
 It is not a performance log service.
 It is not a time-series data base.
 
-
-### Example
-This service hosts simple status, like:
-`{ "entity": "My Worker 03", "status": "Warning", "timestamp": "2021-12-25T10:28:01", "description": "HDD storage warning" }`.
-
-It will **not** host detailed information, like `{ "name": "My Worker 03", "hdd-usage": 97.56 }`.
-
-Data like this is to be updated every some minutes, hourly, daily, etc.
-This service is not meant to update with second or microsecond speed.
+Data needs to be pushed/published into this status event log services, by the machines and services which are represented by the entities.
+This is why the extrapolation [Data Model](./data-model.md) is in place, to model unresponsive services.
+For many services, an additional simple observer service might be a good idea, which checks, collects information and send the status info periodically.
+See the [Getting Started](./getting-started.md) and [Extended Examples](./examples.md) sections for more details.
 
 
-### Scope
-This project contains:
-* API definition -- TODO
-* Documentation on
-	* Getting Started -- TODO
-	* Usage Examples -- TODO
-* A test framework to test implementations of this API -- TODO
-* A mock implementation of this API to easily tests clients -- TODO
+## Descriptions
+Description of the service and API:
+* [Data Model](./data-model.md)
+* [POST API](./post-api.md)
+* [Query API](./query-api.md)
+* [Management API](./management-api.md)
+* [General Concerns](./general.md)
+
+Development Resources:
+* [Getting Started](./getting-started.md)
+* [Extended Examples](./examples.md)
+* [Testing](./testing.md)
 
 This project does **not** contain:
 * A production ready implementation of this API
@@ -38,7 +49,7 @@ This project does **not** contain:
 
 ## Alternatives
 This service, due to it's specialized and minimalistic nature, might not be what you are searching for.
-There are plenty of alternatives:
+There are plenty of alternatives, including:
 
 * [InfluxDB](https://www.influxdata.com/)
 * [SolarWinds Loggly](https://www.loggly.com/)
